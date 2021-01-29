@@ -29,7 +29,6 @@
             :search="search"
             v-model="selected"
             item-key="name"
-            show-select
           >
             <template slot="headerCell" slot-scope="props">
               <v-tooltip bottom>
@@ -43,15 +42,7 @@
             </template>
             <template v-slot:item="row">
               <tr>
-                <td>
-                  <v-checkbox
-                    color="primary"
-                    hide-details
-                    v-model="row.selected"
-                  ></v-checkbox>
-                </td>
                 <td>{{ row.item.name }}</td>
-
                 <td>{{ row.item.result }}</td>
                 <td>{{ row.item.calories }}</td>
                 <td>{{ row.item.carbs }}</td>
@@ -63,33 +54,9 @@
                 </td>
                 <td>
                   <v-btn class="mx-2" dark small color="green">View</v-btn>
-                  <!-- <v-btn
-                    class="mx-2"
-                    fab
-                    dark
-                    small
-                    color="pink"
-                    @click="onButtonClick(row.item)"
-                  >
-                    <v-icon dark>mdi-heart</v-icon>
-                  </v-btn> -->
                 </td>
               </tr>
             </template>
-            <!-- <template slot="items" slot-scope="props">
-              <td>
-                <v-checkbox
-                  color="primary"
-                  hide-details
-                  v-model="props.selected"
-                ></v-checkbox>
-              </td>
-              <td>{{ props.item.name }}</td>
-              <td>{{ props.item.calories }}</td>
-              <td>{{ props.item.fat }}</td>
-              <td>{{ props.item.carbs }}</td>
-              <td>{{ props.item.protein }}</td>
-            </template> -->
           </v-data-table>
         </app-card>
       </v-row>

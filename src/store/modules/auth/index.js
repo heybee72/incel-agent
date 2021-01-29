@@ -1,7 +1,8 @@
 /**
  * Auth Module
  */
-import Vue from 'vue'
+import Vue from 'vue';
+import axios from 'axios';
 import firebase from 'firebase/app';
 import Nprogress from 'nprogress';
 import router from '../../../router';
@@ -14,6 +15,7 @@ import {
 
 const state = {
     user: localStorage.getItem('user'),
+    token: localStorage.getItem('data-main'),
     isUserSigninWithAuth0: Boolean(localStorage.getItem('isUserSigninWithAuth0'))
 }
 
@@ -30,11 +32,35 @@ const getters = {
 // actions
 const actions = {
 
-    signinUser(context, payload) {
-        const { user } = payload;
+    async signinUser(context, payload) {
+        const {
+            user
+        } = payload;
         context.commit('loginUser');
 
-        firebase.auth().signInWithEmailAndPassword(user.email, user.password)
+        try {
+            const response = await axios.post('https://test.mulloy.co/api/agents/login', user); // Success.
+            console.log(response)
+            // context.commit('loginUserSuccess', user);
+        } catch (e) {
+            if (error.response) {
+                let status = error.response.status;
+                if(status == 400){
+                    context.commit('loginUserFailure', e.response.data.error || 'no user');
+                }else{
+                    context.commit('loginUserFailure', "Unable to login, try again");
+                }
+                console.log(error.response.data);
+                console.log(error.response.headers);
+            } else {
+                context.commit('loginUserFailure', "Unable to login, try again");
+            }
+            console.log(e.response.data);
+            // let decoded = JSON.parse(e.response.data);
+            // context.commit('loginUserFailure', e.response.data.error);
+        }
+
+        /* firebase.auth().signInWithEmailAndPassword(user.email, user.password)
             .then(user => {
                 Nprogress.done();
                 setTimeout(() => {
@@ -43,12 +69,16 @@ const actions = {
             })
             .catch(error => {
                 context.commit('loginUserFailure', error);
-            });
+            }); */
+
+
     },
 
 
     signinUserInFirebase(context, payload) {
-        const { user } = payload;
+        const {
+            user
+        } = payload;
         context.commit('loginUser');
         firebase.auth().signInWithEmailAndPassword(user.email, user.password)
             .then(user => {
@@ -119,7 +149,9 @@ const actions = {
         });
     },
     signupUserInFirebase(context, payload) {
-        let { userDetail } = payload;
+        let {
+            userDetail
+        } = payload;
         context.commit('signUpUser');
         firebase.auth().createUserWithEmailAndPassword(userDetail.email, userDetail.password)
             .then(() => {
@@ -145,26 +177,29 @@ const mutations = {
     loginUser() {
         Nprogress.start();
     },
-    loginUserSuccess(state, user) {
+    loginUserSuccess(state, user, token) {
         state.user = user;
-        localStorage.setItem('user',user);
+        state.token = token;
+        localStorage.setItem('user', user);
+        localStorage.setItem('data-main', token);
         state.isUserSigninWithAuth0 = false
         // router.push("/default/dashboard/ecommerce");
         router.push("/admin/dashboard");
-        setTimeout(function(){
+        setTimeout(function () {
             Vue.notify({
                 group: 'loggedIn',
                 type: 'success',
                 text: 'User Logged In Success!'
             });
-       },1500);
+        }, 1500);
     },
     loginUserFailure(state, error) {
         Nprogress.done();
         Vue.notify({
             group: 'loggedIn',
             type: 'error',
-            text: error.message
+            text: error
+            // text: error.message
         });
     },
     logoutUser(state) {
@@ -186,7 +221,7 @@ const mutations = {
     },
     signUpUserFailure(state, error) {
         Nprogress.done();
-         Vue.notify({
+        Vue.notify({
             group: 'loggedIn',
             type: 'error',
             text: error.message
@@ -194,7 +229,7 @@ const mutations = {
     },
     signInUserWithAuth0Success(state, user) {
         state.user = user;
-        localStorage.setItem('user',JSON.stringify(user));
+        localStorage.setItem('user', JSON.stringify(user));
         state.isUserSigninWithAuth0 = true;
     },
     signOutUserFromAuth0Success(state) {

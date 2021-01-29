@@ -127,6 +127,7 @@ export default {
       brand: AppConfig.brand,
     };
   },
+
   methods: {
     submit() {
       const user = {
@@ -134,9 +135,14 @@ export default {
         password: this.password,
       };
 
-      this.$store.dispatch("signinUserInFirebase", {
+      this.$store.dispatch("signinUser", {
         user,
       });
+
+      // this.$store.dispatch("signinUserInFirebase", {
+      //   user,
+      // });
+      
     },
     signInWithFacebook() {
       this.$store.dispatch("signinUserWithFacebook");
