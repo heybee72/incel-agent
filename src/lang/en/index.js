@@ -617,4 +617,5 @@ export default {
   visaApplication: "Visa Application",
   travellers: "Travellers",
   carRental: "Car Rental",
+  logout: "Logout",
 }

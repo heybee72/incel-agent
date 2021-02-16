@@ -12,6 +12,7 @@ const AirportTransfers = () => import('Views/incel-admin/airport.transfers');
 const Locations = () => import('Views/incel-admin/locations');
 const Travellers = () => import('Views/incel-admin/travellers');
 const TourBookings = () => import('Views/incel-admin/tour.bookings');
+const AddTourBooking = () => import('Views/incel-admin/add.tourbooking');
 const HotelBookings = () => import('Views/incel-admin/hotels.bookings');
 const CreateFlight = () => import('Views/incel-admin/flights.create');
 const Flights = () => import('Views/incel-admin/flights');
@@ -19,6 +20,7 @@ const VisaApplication = () => import('Views/incel-admin/visaapplication');
 const TransferBookings = () => import('Views/incel-admin/transfer.bookings');
 const Invoices = () => import('Views/incel-admin/invoices');
 const CarRental = () => import('Views/incel-admin/car.rental');
+const CarRentals = () => import('Views/incel-admin/view.car.rentals');
 
 
 export default {
@@ -195,7 +197,7 @@ export default {
       }
     },
     {
-      path: '/admin/tourboookings',
+      path: '/admin/tourbookings',
       component: TourBookings,
       meta: {
         requiresAuth: true,
@@ -206,6 +208,22 @@ export default {
           },
           {
             breadcrumbActive: 'Tour bookings'
+          }
+        ]
+      }
+    },
+    {
+      path: '/admin/tourbookings/add',
+      component: AddTourBooking,
+      meta: {
+        requiresAuth: true,
+        title: 'message.tourBookings',
+        breadcrumb: [{
+            breadcrumbInactive: 'Dashboard /',
+            url: '/'
+          },
+          {
+            breadcrumbActive: 'Add tour bookings'
           }
         ]
       }
@@ -318,6 +336,22 @@ export default {
           },
           {
             breadcrumbActive: 'Car Rental'
+          }
+        ]
+      }
+    },
+    {
+      path: '/admin/car/rentals',
+      component: CarRentals,
+      meta: {
+        requiresAuth: true,
+        title: 'message.carRental',
+        breadcrumb: [{
+            breadcrumbInactive: 'Dashboard /',
+            url: '/'
+          },
+          {
+            breadcrumbActive: 'Car Rentals'
           }
         ]
       }

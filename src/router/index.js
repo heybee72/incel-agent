@@ -13,6 +13,7 @@ import boxedV2 from './boxed-v2';
 
 // session components
 const SignUpOne = () => import('Views/session/SignUpOne');
+const SignUp = () => import('Views/session/SignUp');
 const LoginOne = () => import('Views/session/LoginOne');
 const LockScreen = () => import('Views/session/LockScreen');
 const ForgotPassword = () => import('Views/session/ForgotPassword');
@@ -38,6 +39,14 @@ export default new Router({
 		{
 			path: '/session/sign-up',
 			component: SignUpOne,
+			meta: {
+				title: 'message.signUp',
+				breadcrumb: null
+			}
+		},
+		{
+			path: '/session/signup',
+			component: SignUp,
 			meta: {
 				title: 'message.signUp',
 				breadcrumb: null

@@ -12,23 +12,69 @@
 						width="78" 
 						height="78" 
 					/> -->
-					<br/>
-				
-					<br/>
-          <h2 class="mb-4 mt-4">Login</h2>
+          <br />
+
+          <br />
+          <h2 class="mb-4 mt-4">Sign Up</h2>
           <p class="fs-14">
-            {{
-              $t("message.enterUsernameAndPasswordToAccessControlPanelOf")
-            }}
+            {{ $t("message.enterUsernameAndPasswordToAccessControlPanelOf") }}
             Incel Agent Dashboard.
           </p>
           <v-form v-model="valid" class="mb-5">
+            <v-text-field
+              label="Fullname"
+              v-model="fullname"
+              :rules="passwordRules"
+              required
+            ></v-text-field>
             <v-text-field
               label="E-mail ID"
               v-model="email"
               :rules="emailRules"
               required
             ></v-text-field>
+            <v-text-field
+              label="Phone number"
+              v-model="phone"
+              :rules="passwordRules"
+              required
+            ></v-text-field>
+            <v-text-field
+              label="Username"
+              v-model="username"
+              :rules="passwordRules"
+              required
+            ></v-text-field>
+            <v-text-field
+              label="Company"
+              v-model="company"
+              :rules="passwordRules"
+              required
+            ></v-text-field>
+            <v-text-field
+              label="Country"
+              v-model="country"
+              :rules="passwordRules"
+              required
+            ></v-text-field>
+            <v-text-field
+              label="Business Address"
+              v-model="address"
+              :rules="passwordRules"
+              required
+            ></v-text-field>
+            <v-text-field
+              label="Branches"
+              v-model="branch"
+              :rules="passwordRules"
+              required
+            ></v-text-field>
+            <label>Add Profile image: </label>
+            <input
+            type="file"
+              ref="file"
+              v-on:change="handleFileUpload"
+            />
             <v-text-field
               label="Password"
               v-model="password"
@@ -41,13 +87,13 @@
               label="Remember me"
               v-model="checkbox"
             ></v-checkbox>
-            <router-link class="mb-2" to="/session/forgot-password"
-              >{{ $t("message.forgotPassword") }}?</router-link
+            <router-link class="mb-2" to="/session/login"
+              >Already have an account?</router-link
             >
             <div>
-              <v-btn large @click="submit" block color="primary" class="mb-2">{{
-                $t("message.loginNow")
-              }}</v-btn>
+              <v-btn large @click="submit" block color="primary" class="mb-2"
+                >SIGN UP NOW</v-btn
+              >
               <!-- <v-btn
                 large
                 @click="onCreateAccount"
@@ -58,8 +104,7 @@
               > -->
             </div>
             <p>{{ $t("message.bySigningUpYouAgreeTo") }} Incel</p>
-            <router-link to="/session/signup">Don't have an account?</router-link>
-            <!-- <router-link to="">{{ $t("message.termsOfService") }}</router-link> -->
+            <router-link to="">{{ $t("message.termsOfService") }}</router-link>
           </v-form>
           <div class="session-social-links d-inline-block">
             <!-- <ul class="list-unstyled mb-2">
@@ -123,31 +168,47 @@ export default {
           "E-mail must be valid",
       ],
       password: "",
-      passwordRules: [(v) => !!v || "Password is required"],
+      passwordRules: [(v) => !!v || "This field is required"],
+      fullname: "",
+      phone: "",
+      username: "",
+      country: "",
+      company: "",
+      address: "",
+      branch: "",
+      file: "",
       appLogo: AppConfig.appLogo2,
       brand: AppConfig.brand,
     };
   },
 
-  mounted(){
-    localStorage.removeItem('user');
-  },
-
   methods: {
     submit() {
-      const user = {
-        email: this.email,
-        password: this.password,
-      };
+        let formData = new FormData();
+    //   const user = {
+    //     email: this.email,
+    //     password: this.password,
+    //   };
+        formData.append('name', this.fullname);
+        formData.append('email', this.email);
+        formData.append('phone', this.phone);
+        formData.append('username', this.username);
+        formData.append('company', this.company);
+        formData.append('country', this.country);
+        formData.append('business_address', this.address);
+        formData.append('branches', this.branch);
+        formData.append('password', this.password);
+        formData.append('profile_image', this.file);
 
-      this.$store.dispatch("signinUser", {
-        user,
-      });
+        this.$store.dispatch("signUpUser", formData);
 
       // this.$store.dispatch("signinUserInFirebase", {
       //   user,
       // });
-      
+    },
+    handleFileUpload() {
+      this.file = this.$refs.file.files[0];
+    //   alert("jjj")
     },
     signInWithFacebook() {
       this.$store.dispatch("signinUserWithFacebook");

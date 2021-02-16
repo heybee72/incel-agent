@@ -15,10 +15,9 @@ import {
 
 const state = {
     user: localStorage.getItem('user'),
-    token: localStorage.getItem('data-main'),
     isUserSigninWithAuth0: Boolean(localStorage.getItem('isUserSigninWithAuth0'))
 }
-
+const BASE_URL = "https://test.mulloy.co/api/";
 // getters
 const getters = {
     getUser: state => {
@@ -39,19 +38,21 @@ const actions = {
         context.commit('loginUser');
 
         try {
-            const response = await axios.post('https://test.mulloy.co/api/agents/login', user); // Success.
-            console.log(response)
-            // context.commit('loginUserSuccess', user);
+            const response = await axios.post(BASE_URL + 'agents/login', user); // Success.
+            // console.log(response.data.token)
+            delete user["password"];
+            user["token"] = response.data.token;
+            context.commit('loginUserSuccess', user);
         } catch (e) {
-            if (error.response) {
-                let status = error.response.status;
-                if(status == 400){
-                    context.commit('loginUserFailure', e.response.data.error || 'no user');
-                }else{
+            if (e.response) {
+                let status = e.response.status;
+                if (status == 400) {
+                    context.commit('loginUserFailure', e.response.data.error || 'no user found');
+                } else {
                     context.commit('loginUserFailure', "Unable to login, try again");
                 }
-                console.log(error.response.data);
-                console.log(error.response.headers);
+                console.log(e.response.data);
+                console.log(e.response.headers);
             } else {
                 context.commit('loginUserFailure', "Unable to login, try again");
             }
@@ -71,6 +72,43 @@ const actions = {
                 context.commit('loginUserFailure', error);
             }); */
 
+
+    },
+
+    async signUpUser(context, payload) {
+        // const {
+        //     user
+        // } = payload;
+        context.commit('loginUser');
+        // console.log(user)
+
+        try {
+            const response = await axios.post(BASE_URL + 'agents/register', payload, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+              }); // Success.
+            console.log(response.data)
+            // delete user["password"];
+            // user["token"] = response.data.token;
+            context.commit('signUserSuccess');
+        } catch (e) {
+            // if (e.response) {
+            //     let status = e.response.status;
+            //     if (status == 400) {
+            //         context.commit('loginUserFailure', e.response.data.error || 'no user found');
+            //     } else {
+            //         context.commit('loginUserFailure', "Unable to login, try again");
+            //     }
+            //     console.log(e.response.data);
+            //     console.log(e.response.headers);
+            // } else {
+                context.commit('loginUserFailure', "Unable to sign up, try again");
+            // }
+            console.log(e.response);
+            // let decoded = JSON.parse(e.response.data);
+            // context.commit('loginUserFailure', e.response.data.error);
+        }
 
     },
 
@@ -177,11 +215,9 @@ const mutations = {
     loginUser() {
         Nprogress.start();
     },
-    loginUserSuccess(state, user, token) {
+    loginUserSuccess(state, user) {
         state.user = user;
-        state.token = token;
-        localStorage.setItem('user', user);
-        localStorage.setItem('data-main', token);
+        localStorage.setItem('user', JSON.stringify(user));
         state.isUserSigninWithAuth0 = false
         // router.push("/default/dashboard/ecommerce");
         router.push("/admin/dashboard");
@@ -189,9 +225,23 @@ const mutations = {
             Vue.notify({
                 group: 'loggedIn',
                 type: 'success',
-                text: 'User Logged In Success!'
+                text: 'Agent Logged In Successfully!'
             });
-        }, 1500);
+        }, 1500); 
+    },
+    signUserSuccess() {
+        // state.user = user;
+        // localStorage.setItem('user', JSON.stringify(user));
+        // state.isUserSigninWithAuth0 = false
+        // router.push("/default/dashboard/ecommerce");
+        router.push("/session/login");
+        setTimeout(function () {
+            Vue.notify({
+                group: 'loggedIn',
+                type: 'success',
+                text: 'Agent Created Successfully!'
+            });
+        }, 1500); 
     },
     loginUserFailure(state, error) {
         Nprogress.done();

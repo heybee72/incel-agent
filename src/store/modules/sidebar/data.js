@@ -34,7 +34,7 @@ export const menus = {
 			active: false,
 			items: [{
 				title: 'message.bookExistingTours',
-				path: '/tourboookings',
+				path: '/tourbookings',
 			}, ],
 		},
 		{
@@ -93,6 +93,15 @@ export const menus = {
 			active: false,
 			items: null,
 			path: '/invoices',
+			label: 'Old'
+		},
+		{
+			action: 'zmdi-sign-in',
+			title: 'message.logout',
+			active: false,
+			items: null,
+			exact: true,
+			path: '/session/login',
 			label: 'Old'
 		},
 

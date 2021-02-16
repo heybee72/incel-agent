@@ -20,18 +20,16 @@
               v-model="search"
             >
             </v-text-field>
-            <!-- <v-spacer></v-spacer> -->
-            <!-- <v-btn color="green"><v-icon color="white">mdi-plus</v-icon></v-btn> -->
+            <v-spacer></v-spacer>
+            <v-btn color="success" depressed @click="addTourBookingPage"><v-icon color="white">mdi-plus</v-icon> Book new tour</v-btn>
           </v-card-title>
           <v-data-table
             :headers="headers"
             :items="items"
             :search="search"
-            v-model="selected"
             item-key="name"
-            show-select
           >
-            <template slot="headerCell" slot-scope="props">
+            <!-- <template slot="headerCell" slot-scope="props">
               <v-tooltip bottom>
                 <span slot="activator">
                   {{ props.header.text }}
@@ -40,30 +38,19 @@
                   {{ props.header.text }}
                 </span>
               </v-tooltip>
-            </template>
+            </template> -->
             <template v-slot:item="row">
               <tr>
-                <td>
-                  <v-checkbox
-                    color="primary"
-                    hide-details
-                    v-model="row.selected"
-                  ></v-checkbox>
-                </td>
                 <td>{{ row.item.name }}</td>
 
-                <td>{{ row.item.result }}</td>
-                <td>{{ row.item.calories }}</td>
-                <td>{{ row.item.carbs }}</td>
-                <td>{{ row.item.carbs }}</td>
-                <td>{{ row.item.carbs }}</td>
+                <td>{{ row.item.tour }}</td>
+                <td>{{ row.item.dob }}</td>
+                <td>{{ row.item.children_price }}</td>
+                <td>{{ row.item.adult_price }}</td>
+                <td>{{ row.item.passport_number }}</td>
+                <td>{{ row.item.country_of_issue }}</td>
                 <td>
-                  <v-chip class="ma-2" small dark color="blue" label>
-                    Pending
-                  </v-chip>
-                </td>
-                <td>
-                  <v-btn class="mx-2" dark small color="default">Invoice</v-btn>
+                  <v-btn class="mx-2" dark small color="success">View</v-btn>
                 </td>
               </tr>
             </template>
@@ -90,33 +77,61 @@ export default {
           sortable: false,
           value: "name",
         },
-        { text: "Tour type", value: "calories" },
-        { text: "User", value: "fat" },
-        { text: "Price", value: "carbs" },
-        { text: "Adult", value: "protein" },
-        { text: "Children", value: "children" },
-        { text: "Status", value: "status" },
+        { text: "Tour", value: "tour" },
+        { text: "Date of birth", value: "dob" },
+        { text: "Children Price", value: "children_price" },
+        { text: "Adult rice", value: "adult_price" },
+        { text: "Passport number", value: "passport_number" },
+        { text: "Country of issue", value: "country_of_issue" },
         { text: "Action", value: "action" },
       ],
       items: [],
     };
   },
   mounted() {
-    this.getTablesData();
+     let user =
+      typeof this.$store.getters.getUser == "string"
+        ? JSON.parse(this.$store.getters.getUser)
+        : this.$store.getters.getUser;
+    this.getTablesData(user);
   },
   methods: {
-    getTablesData() {
+    getTablesData(user) {
+      // let user = this.$store.getters.getUser;
+      console.log(user.token);
       api
-        .get("vuely/tablesData.js")
+        .get("tour_bookings/agentViewBooking", {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        })
         .then((response) => {
-          print(response.data);
+          let result = response.data;
+          console.log(result);
+          for (const index in result.tourBooking) {
+            this.items.push({
+              name: `${result.tourBooking[index].fullname}`,
+              tour: `${result.tourBooking[index].tour}`,
+              dob: `${result.tourBooking[index].dob}`,
+              children_price: `${result.tourBooking[index].children_price}`,
+              adult_price: `${result.tourBooking[index].adult_price}`,
+              passport_number: `${result.tourBooking[index].passport_number}`,
+              country_of_issue: `${result.tourBooking[index].country_of_issue}`,
+            });
+            // console.log(result.traveller[index].fullname);
+          }  
           this.loader = false;
-          this.items = response.data;
+          // this.items = response.data;
         })
         .catch((error) => {
-          console.log(error);
+          this.loader = false;
+          console.log(error.response);
         });
     },
+    addTourBookingPage(){
+      // alert('ll');
+      this.$router.push('/admin/tourbookings/add')
+    }
   },
 };
 </script>
