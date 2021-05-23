@@ -12,14 +12,12 @@
 						width="78" 
 						height="78" 
 					/> -->
-					<br/>
-				
-					<br/>
+          <br />
+
+          <br />
           <h2 class="mb-4 mt-4">Login</h2>
           <p class="fs-14">
-            {{
-              $t("message.enterUsernameAndPasswordToAccessControlPanelOf")
-            }}
+            {{ $t("message.enterUsernameAndPasswordToAccessControlPanelOf") }}
             Incel Agent Dashboard.
           </p>
           <v-form v-model="valid" class="mb-5">
@@ -58,7 +56,9 @@
               > -->
             </div>
             <p>{{ $t("message.bySigningUpYouAgreeTo") }} Incel</p>
-            <router-link to="/session/signup">Don't have an account?</router-link>
+            <router-link to="/session/signup"
+              >Don't have an account?</router-link
+            >
             <!-- <router-link to="">{{ $t("message.termsOfService") }}</router-link> -->
           </v-form>
           <div class="session-social-links d-inline-block">
@@ -129,8 +129,9 @@ export default {
     };
   },
 
-  mounted(){
-    localStorage.removeItem('user');
+  mounted() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("expiry");
   },
 
   methods: {
@@ -147,7 +148,6 @@ export default {
       // this.$store.dispatch("signinUserInFirebase", {
       //   user,
       // });
-      
     },
     signInWithFacebook() {
       this.$store.dispatch("signinUserWithFacebook");

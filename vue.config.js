@@ -16,6 +16,7 @@ module.exports = {
   configureWebpack: {
     resolve: {
         alias: {
+          Dataset: path.resolve(__dirname, 'src/data/'),
           Api: path.resolve(__dirname, 'src/api/'),
           Components: path.resolve(__dirname, 'src/components/'),
           Constants: path.resolve(__dirname, 'src/constants/'),

@@ -216,8 +216,14 @@ const mutations = {
         Nprogress.start();
     },
     loginUserSuccess(state, user) {
+        // Create new Date instance
+        var date = new Date()
+        // Add a day
+        date.setDate(date.getDate() + 1)
         state.user = user;
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem("expiry", date);
+
         state.isUserSigninWithAuth0 = false
         // router.push("/default/dashboard/ecommerce");
         router.push("/admin/dashboard");

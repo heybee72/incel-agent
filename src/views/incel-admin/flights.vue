@@ -91,19 +91,32 @@ export default {
     };
   },
   mounted() {
-    this.getTablesData();
+    let user =
+      typeof this.$store.getters.getUser == "string"
+        ? JSON.parse(this.$store.getters.getUser)
+        : this.$store.getters.getUser;
+    this.getTablesData(user);
   },
   methods: {
-    getTablesData() {
+    getTablesData(user) {
       api
-        .get("vuely/tablesData.js")
+        .post(
+          "flight_bookings/agentViewBooking",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        )
         .then((response) => {
-          print(response.data);
+          // print(response.data);
           this.loader = false;
-          this.items = response.data;
+          console.log(response.data);
+          // this.items = response.data;
         })
         .catch((error) => {
-          console.log(error);
+          console.log(error.response);
         });
     },
   },

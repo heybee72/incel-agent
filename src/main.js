@@ -5,7 +5,9 @@ import Vue from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify';
 import * as VueGoogleMaps from 'vue2-google-maps'
-import { Vue2Dragula } from 'vue2-dragula'
+import {
+	Vue2Dragula
+} from 'vue2-dragula'
 import VueQuillEditor from 'vue-quill-editor'
 import wysiwyg from 'vue-wysiwyg'
 import VueBreadcrumbs from 'vue2-breadcrumbs'
@@ -25,7 +27,9 @@ import GlobalComponents from './globalComponents'
 import router from './router'
 
 // store
-import { store } from './store/store';
+import {
+	store
+} from './store/store';
 
 // firebase
 import './firebase'
@@ -42,18 +46,28 @@ Vue.config.productionTip = false
 router.beforeEach((to, from, next) => {
 	Nprogress.start()
 	if (to.matched.some(record => record.meta.requiresAuth)) {
-		// this route requires auth, check if logged in
-		// if not, redirect to login page.
-		if (localStorage.getItem('user') == null ) {
-			next({
-				path: '/session/login',
-				query: { redirect: to.fullPath }
-			})
-		} else {
-			next()
+		try {
+			// this route requires auth, check if logged in
+			// if not, redirect to login page.
+			let currentDate = new Date();
+			let date = localStorage.getItem('expiry') == null ? null : Date.parse(localStorage.getItem('expiry'));
+			let token = localStorage.getItem('user');
+			console.log(date)
+			if (token == null || date == null || currentDate >= date) {
+				next({
+					path: '/session/login',
+					query: {
+						redirect: to.fullPath
+					}
+				})
+			} else {
+				next();
+			}
+		} catch (e) {
+			console.log(e);
 		}
 	} else {
-		next() // make sure to always call next()!
+		next(); // make sure to always call next()!
 	}
 })
 
@@ -62,15 +76,15 @@ router.afterEach(() => {
 	Nprogress.done()
 	setTimeout(() => {
 		const contentWrapper = document.querySelector(".v-content__wrap");
-		if(contentWrapper !== null){
+		if (contentWrapper !== null) {
 			contentWrapper.scrollTop = 0;
 		}
 		const boxedLayout = document.querySelector('.app-boxed-layout .app-content');
-		if(boxedLayout !==  null){
+		if (boxedLayout !== null) {
 			boxedLayout.scrollTop = 0;
 		}
 		const miniLayout = document.querySelector('.app-mini-layout .app-content');
-		if(miniLayout !== null){
+		if (miniLayout !== null) {
 			miniLayout.scrollTop = 0;
 		}
 	}, 200);
@@ -84,7 +98,9 @@ Vue.use(VueQuillEditor)
 Vue.use(VueResource)
 Vue.use(wysiwyg, {})
 Vue.use(VueBreadcrumbs)
-Vue.use(Notifications, { velocity })
+Vue.use(Notifications, {
+	velocity
+})
 Vue.use(fullscreen);
 Vue.use(GlobalComponents);
 Vue.use(VueVideoPlayer);
@@ -102,10 +118,12 @@ const i18n = new VueI18n({
 
 
 new Vue({
-  store,
+	store,
 	i18n,
 	router,
-  vuetify,
-  render: h => h(App),
-	components: { App }
+	vuetify,
+	render: h => h(App),
+	components: {
+		App
+	}
 }).$mount('#app')
