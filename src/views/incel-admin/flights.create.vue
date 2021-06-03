@@ -134,7 +134,7 @@
               <!-- <v-card-subtitle> Search Hotels </v-card-subtitle> -->
               <hr />
               <!-- <template v-slot:extension> -->
-              <v-tabs v-model="tabs" background-color="green darken-3" dark>
+              <v-tabs v-model="tabs" background-color="green darken-3" slider-color="black" slider-size="4" dark>
                 <v-tab> ONE WAY </v-tab>
                 <v-tab> ROUND TRIP </v-tab>
                 <v-tab> MULTI-CITY </v-tab>

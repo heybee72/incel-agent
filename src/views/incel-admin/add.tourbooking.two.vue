@@ -14,7 +14,7 @@
                 color="deep-purple accent-4"
               ></v-progress-linear>
               <v-card-title>
-                Add new tour booking
+                Continue tour booking
 
                 <v-spacer></v-spacer>
 
@@ -23,86 +23,80 @@
               <!-- <v-card-subtitle> Search Hotels </v-card-subtitle> -->
               <hr />
               <v-form ref="form" v-model="isFormValid">
-                <!-- <p class="success-text">Other core setup values</p> -->
                 <v-row class="border-rad-sm overflow-hidden">
-                  <v-col cols="6" class="pa-4">
-                    <v-select
-                      :items="items"
-                      item-text="name"
-                      item-value="id"
-                      label="Select traveller"
-                      dense
-                      v-model="tid"
-                      outlined
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="6" class="pa-4">
-                    <v-select
-                      :items="countries"
-                      item-text="name"
-                      item-value="id"
-                      label="Select country"
-                      dense
-                      v-model="countryId"
-                      @change="(id) => fetchTourCities(id)"
-                      outlined
-                    ></v-select>
-                  </v-col>
-                </v-row>
-                <v-row
-                  class="border-rad-sm overflow-hidden"
-                  v-show="cities.length"
-                >
-                  <v-col cols="6" class="pa-4">
+                  <v-col cols="12" sm="12" md="4" class="pa-4">
                     <v-text-field
-                      v-model="tourDate"
-                      type="date"
+                      v-model="adults"
+                      :counter="2"
                       :rules="rules"
-                      dense
-                      label="Select tour date"
                       outlined
+                      dense
+                      label="Number of adult(s)"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="6" class="pa-4">
-                    <v-select
-                      :items="cities"
-                      item-text="name"
-                      item-value="id"
-                      label="Select city"
-                      dense
-                      v-model="cityId"
-                      @change="fetchTours"
+                  <v-col cols="12" sm="12" md="4" class="pa-4">
+                    <v-text-field
+                      v-model="children"
+                      :counter="2"
+                      :rules="rules"
                       outlined
-                    ></v-select>
+                      dense
+                      label="Number of children"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="12" md="4" class="pa-4">
+                    <v-text-field
+                      v-model="infants"
+                      :counter="2"
+                      :rules="rules"
+                      outlined
+                      dense
+                      label="Number of infant(s)"
+                    ></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row class="border-rad-sm overflow-hidden radio-input-row">
                   <v-col
                     cols="6"
                     class="pa-4"
-                    v-for="tour in tours"
-                    v-bind:key="tour.id"
+                    v-for="tourOption in tourOptions"
+                    v-bind:key="tourOption.i"
                     sm="12"
                     md="6"
                     lg="6"
                     xl="6"
                   >
                     <v-card
-                      :class="selectedTour.id == tour.id ? 'is-active' : ''"
-                      @click="selectedTour = tour"
+                      :class="
+                        selectedtourOption.i == tourOption.i ? 'is-active' : ''
+                      "
+                      @click="selectedtourOption = tourOption"
                     >
                       <v-card-title>
-                        {{ tour.title }}
+                        {{ tourOption.transferName }}
                       </v-card-title>
-                      <v-card-subtitle>
-                        <p>{{ tour.type }}></p>
-                        <p>
-                          <strong>{{ tour.amount }}</strong>
-                        </p></v-card-subtitle
-                      >
+                      <!-- <v-card-subtitle>
+                        {{ tour.type }}>
+                        </v-card-subtitle
+                      > -->
 
                       <v-card-text>
-                        {{ tour.desc }}
+                        <h5>
+                          Adult price: <small>AED</small>
+                          {{ tourOption.adultPrice }}
+                        </h5>
+                        <h5>
+                          Child(ren) price: <small>AED</small>
+                          {{ tourOption.childPrice }}
+                        </h5>
+                        <h5>
+                          Infant price: <small>AED</small>
+                          {{ tourOption.infantPrice }}
+                        </h5>
+                        <h5>
+                          Total price: <small>AED</small
+                          ><strong> {{ tourOption.finalAmount }}</strong>
+                        </h5>
                       </v-card-text>
                     </v-card>
                     <!-- <label>
@@ -124,18 +118,29 @@
    <span v-html="opt.value"></span>
 </label> -->
                 </v-row>
-
                 <br />
                 <br />
                 <v-row align="center" justify="space-around">
                   <!-- <v-btn @click="leavePage" depressed color="error"> Cancel </v-btn> -->
                   <v-btn
+                    v-if="
+                      !selectedtourOption.i || selectedtourOption.length < 1
+                    "
                     depressed
                     :disabled="!isFormValid || loading"
                     color="success"
-                    @click="navigateToPageTwo"
+                    @click="fetchTourOptions"
                   >
-                    Continue booking
+                    Get tour options
+                  </v-btn>
+                  <v-btn
+                    v-else
+                    depressed
+                    :disabled="!isFormValid || loading"
+                    color="success"
+                    @click="fetchTourTimeslots"
+                  >
+                    Get tour timeslots
                   </v-btn>
                 </v-row>
               </v-form>
@@ -153,24 +158,17 @@ import api from "Api";
 
 export default {
   components: {},
+  props: ["tour", "tourDate"],
   data() {
     return {
       isFormValid: false,
       loading: false,
-      items: [
-        { id: 1, name: "John Doe" },
-        { id: 2, name: "Jane Doe" },
-      ],
-      tours: [],
-      countries: [],
-      cities: [],
+      adults: "0",
+      children: "0",
+      infants: "0",
+      tourOptions: [],
+      selectedtourOption: {},
       max: 1000,
-      tid: "",
-      countryId: "",
-      cityId: "",
-      tourId: "",
-      selectedTour: {},
-      tourDate: "",
       rules: [
         (value) => !!value || "Required.",
         // (value) => (value || "").length <= 20 || "Max 20 characters",
@@ -182,52 +180,88 @@ export default {
     };
   },
   mounted() {
-    let user =
-      typeof this.$store.getters.getUser == "string"
-        ? JSON.parse(this.$store.getters.getUser)
-        : this.$store.getters.getUser;
-    this.fetchTravllers(user);
-    this.fetchTourCountries(user);
+    // let user =
+    //   typeof this.$store.getters.getUser == "string"
+    //     ? JSON.parse(this.$store.getters.getUser)
+    //     : this.$store.getters.getUser;
+    console.log(this.tour);
+    // console.log(this.$route.params.items)
   },
   methods: {
     leavePage() {
       this.$router.push("/admin/dashboard");
     },
-    fetchTravllers(user) {
-      api
-        .get("travellers/agent_view", {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        })
-        .then((response) => {
-          let travellers = response.data.traveller;
-          for (let i = 0; i < travellers.length; i++) {
-            const traveller = travellers[i];
-            this.items.push({ id: traveller.id, name: traveller.fullname });
-          }
-          //   console.log(result);
-        })
-        .catch((error) => {
-          console.log(error.response);
-        });
-    },
-    fetchTours() {
-      if (this.tourDate.trim().length < 1) {
-        Vue.notify({
-          group: "loggedIn",
-          type: "error",
-          text: "Select tour date",
-        });
-        return;
-      }
+
+    fetchTourOptions() {
+      //   if (this.tourDate.trim().length < 1) {
+      //     Vue.notify({
+      //       group: "loggedIn",
+      //       type: "error",
+      //       text: "Select tour date",
+      //     });
+      //     return;
+      //   }
       this.loading = true;
       api
         .post(
-          "tour/tours",
+          "tour/options",
           {
-            country_id: this.countryId,
-            city_id: this.cityId,
+            tour_id: this.tour.id,
+            contract_id: this.tour.contractId,
+            date: "2021-05-26",
+            adults: this.adults,
+            children: this.children,
+            infants: this.infants,
+          },
+          {
+            headers: {
+              //  Authorization: `Bearer ${user.token}`,
+            },
+          }
+        )
+        .then((response) => {
+          let tourOptions = response.data.data;
+          this.tourOptions = [];
+          for (let i = 0; i < tourOptions.length; i++) {
+            const tourOption = tourOptions[i];
+            this.tourOptions.push({
+              i: i + 1,
+              tourOptionId: tourOption.tourOptionId,
+              transferId: tourOption.transferId,
+              transferName: tourOption.transferName,
+              adultPrice: tourOption.adultPrice,
+              childPrice: tourOption.childPrice,
+              infantPrice: tourOption.infantPrice,
+              finalAmount: tourOption.finalAmount,
+            });
+          }
+          this.loading = false;
+          console.log(tourOptions);
+        })
+        .catch((error) => {
+          this.loading = false;
+          console.log(error.response);
+        });
+    },
+
+    fetchTourTimeslots() {
+      //   if (this.tourDate.trim().length < 1) {
+      //     Vue.notify({
+      //       group: "loggedIn",
+      //       type: "error",
+      //       text: "Select tour date",
+      //     });
+      //     return;
+      //   }
+      this.loading = true;
+      api
+        .post(
+          "tour/timeslots",
+          {
+            tour_id: this.tour.id,
+            contract_id: this.tour.contractId,
+            tour_option_id: this.selectedtourOption.tourOptionId,
+            transfer_id: this.selectedtourOption.transferId,
             date: this.formatDate(this.tourDate),
           },
           {
@@ -237,72 +271,27 @@ export default {
           }
         )
         .then((response) => {
-          let tours = response.data.data;
-          this.tours = [];
-          for (let i = 0; i < tours.length; i++) {
-            const tour = tours[i];
-            this.tours.push({
-              i: i,
-              id: tour.tourId,
-              title: tour.tourName,
-              type: tour.cityTourType,
-              amount: tour.amount,
-              discount: tour.discount,
-              contractId: tour.contractId,
-              desc: tour.tourShortDescription,
+          let result = response.data;
+          if (result.status == false) {
+            Vue.notify({
+              group: "loggedIn",
+              type: "error",
+              text: result.message,
             });
+          } else {
+            console.log(result.data);
+            this.navigateToBookingAvailability();
           }
+          //   this.tourOptions = [];
+          //   for (let i = 0; i < tourOptions.length; i++) {
+          //     const tourOption = tourOptions[i];
+
+          //   }
           this.loading = false;
-          console.log(tours);
+          //   console.log(tourOptions);
         })
         .catch((error) => {
           this.loading = false;
-          console.log(error.response);
-        });
-    },
-    fetchTourCountries(user) {
-      console.log(user);
-      api
-        .get("tour/countries", {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        })
-        .then((response) => {
-          let countries = response.data.data;
-          for (let i = 0; i < countries.length; i++) {
-            const country = countries[i];
-            this.countries.push({
-              id: country.countryId,
-              name: country.countryName,
-            });
-          }
-          console.log(this.countries);
-        })
-        .catch((error) => {
-          console.log(error.response);
-        });
-    },
-    fetchTourCities(id) {
-      // console.log(user);
-      api
-        .get(`tour/country/${id}/cities`, {
-          // headers: {
-          //   Authorization: `Bearer ${user.token}`,
-          // },
-        })
-        .then((response) => {
-          let cities = response.data.data;
-          for (let i = 0; i < cities.length; i++) {
-            const city = cities[i];
-            this.cities.push({
-              id: city.cityId,
-              name: city.cityName,
-            });
-          }
-          console.log(cities);
-        })
-        .catch((error) => {
           console.log(error.response);
         });
     },
@@ -346,15 +335,6 @@ export default {
           });
         });
     },
-    navigateToPageTwo() {
-      this.$router.push({
-        name: "addBookingTwo",
-        params: {
-          tour: this.selectedTour,
-          tourDate: this.tourDate,
-        },
-      });
-    },
     formatDate(date) {
       var today = new Date(date);
       var dd = today.getDate();
@@ -371,6 +351,16 @@ export default {
 
       today = mm + "/" + dd + "/" + yyyy;
       return today;
+    },
+    navigateToBookingAvailability(timeslots) {
+      this.$router.push({
+        name: "addBookingAvailability",
+        params: {
+          tour: this.tour,
+          tourDate: this.tourDate,
+          timeslots: timeslots
+        },
+      });
     },
   },
 };

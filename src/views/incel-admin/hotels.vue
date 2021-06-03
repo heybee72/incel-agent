@@ -3,6 +3,62 @@
     <page-title-bar></page-title-bar>
 
     <v-container class="grid-list-xl pt-0">
+      <!-- profile image view -->
+      <v-dialog v-model="popupDialog" persistent max-width="400px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Select option</span>
+          </v-card-title>
+          <v-card-text>
+            <paystack
+              id="pay-button"
+              :amount="roomAMount"
+              email="incel@portal.com"
+              :paystackkey="PUBLIC_KEY"
+              :reference="reference"
+              :callback="(ref) => bookRoomOnline(ref)"
+              :close="close"
+            >
+              Continue to payment
+            </paystack>
+            <br />
+            <hr />
+            <br />
+            <v-btn
+              dark
+              :disabled="loading"
+              color="blue darken-1"
+              @click="bookRoomNow"
+              block
+            >
+              Book now, pay later
+            </v-btn>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="popupDialog = false">
+              Close
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <!-- profile image view end -->
+      <!-- progress loader -->
+      <v-dialog v-model="progressDialog" persistent max-width="400px">
+        <v-card>
+          <!-- <v-card-title>
+            <span class="headline">Select option</span>
+          </v-card-title> -->
+          <v-card-text style="text-align: center">
+            Loading please wait ...
+            <br />
+            <v-progress-circular
+              indeterminate
+              color="primary"
+            ></v-progress-circular>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
       <div class="crypto-dash-wrap">
         <v-row class="border-rad-sm overflow-hidden">
           <v-col cols="12" sm="12" md="12" lg="12" xl="12" class="pa-0">
@@ -110,12 +166,15 @@
                       No description available
                     </p>
                     <!-- <p else>{{ rate.tariffNotes }}</p> -->
-                    <div v-if="!Array.isArray(rate.tariffNotes)" v-html="rate.tariffNotes"/>
+                    <div
+                      v-if="!Array.isArray(rate.tariffNotes)"
+                      v-html="rate.tariffNotes"
+                    />
                     <v-btn
                       style="margin: 20px 0px"
                       color="green"
                       dark
-                      @click="loading = true"
+                      @click="() => openPopupModal(rate.amount)"
                       >Book now</v-btn
                     >
                     <hr />
@@ -131,6 +190,13 @@
                     {{ r.rates.description }}
                     <small>{{ ` ( USD ${r.rates.amount} ) ` }}</small>
                   </h3>
+                  <v-btn
+                    style="margin: 20px 0px"
+                    color="green"
+                    dark
+                    @click="() => openPopupModal(r.rates.amount)"
+                    >Book now</v-btn
+                  >
                 </v-card-text>
               </v-card>
               <!-- <RoomCard
@@ -241,7 +307,8 @@
                       v-model="checkin"
                       type="date"
                       :rules="rules"
-                      solo
+                      outlined
+                      dense
                       label="Check In"
                     ></v-text-field>
                   </v-col>
@@ -250,6 +317,8 @@
                       v-model="checkout"
                       type="date"
                       :rules="rules"
+                      outlined
+                      dense
                       label="Check Out"
                     ></v-text-field>
                   </v-col>
@@ -299,21 +368,29 @@
   </div>
 </template>
 
+
 <script>
 import Dataset from "Dataset";
 import api from "Api";
+import Vue from "vue";
+import paystack from "vue-paystack";
 // import RoomCard from "./hotels/room.vue";
 
 export default {
   components: {
+    paystack,
     // RoomCard,
   },
   data() {
     return {
       isFormValid: false,
+      popupDialog: false,
+      progressDialog: false,
       loading: false,
       isSelectingRoom: false,
       max: 1000,
+      roomAMount: 7038000,
+      PUBLIC_KEY: "pk_test_2bd5300869fc1e31aef3d0f9c222fc2c40055f3f",
       model: "",
       country: "",
       city: "",
@@ -358,6 +435,16 @@ export default {
       });
     }
     console.log(this.items);
+  },
+  computed: {
+    reference() {
+      let text = "";
+      let possible =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      for (let i = 0; i < 10; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      return text;
+    },
   },
   methods: {
     async fetchCities() {
@@ -455,6 +542,7 @@ export default {
         hotel_id: "",
         hotel_name: "",
       };
+
       let user =
         typeof this.$store.getters.getUser == "string"
           ? JSON.parse(this.$store.getters.getUser)
@@ -496,6 +584,100 @@ export default {
         console.log(e);
       }
     },
+    async bookRoomNow() {
+      this.popupDialog = false;
+      this.loading = true;
+      this.progressDialog = true;
+      setTimeout(() => {
+        this.loading = false;
+        this.progressDialog = false;
+        Vue.notify({
+          group: "loggedIn",
+          type: "success",
+          text: "Hotel room has been booked successfully!",
+        });
+      }, 6000);
+      // try {
+      //   const response = await api.post(
+      //     "travellers/profile_image_update",
+      //     formData,
+      //     {
+      //       headers: {
+      //         "Content-Type": "multipart/form-data",
+      //         Authorization: `Bearer ${user.token}`,
+      //       },
+      //     }
+      //   ); // Success.
+      // this.loading = false;
+      // console.log(response.data);
+      // Vue.notify({
+      //   group: "loggedIn",
+      //   type: "success",
+      //   text: "Hotel room has been booked successfully!",
+      // });
+      // delete user["password"];
+      // user["token"] = response.data.token;
+      // context.commit('signUserSuccess');
+      // } catch (e) {
+      //   this.loading = false;
+      //   Vue.notify({
+      //     group: "loggedIn",
+      //     type: "error",
+      //     text: "Unable to update image, please try again!",
+      //   });
+      //   console.log(e.response);
+      // }
+    },
+    async bookRoomOnline(ref) {
+      this.popupDialog = false;
+      this.loading = true;
+      this.progressDialog = true;
+      console.log(ref);
+      setTimeout(() => {
+        this.loading = false;
+        this.progressDialog = false;
+        Vue.notify({
+          group: "loggedIn",
+          type: "success",
+          text: "Hotel room has been booked successfully!",
+        });
+      }, 6000);
+      // try {
+      //   const response = await api.post(
+      //     "travellers/profile_image_update",
+      //     formData,
+      //     {
+      //       headers: {
+      //         "Content-Type": "multipart/form-data",
+      //         Authorization: `Bearer ${user.token}`,
+      //       },
+      //     }
+      //   ); // Success.
+      // this.loading = false;
+      // console.log(response.data);
+      // Vue.notify({
+      //   group: "loggedIn",
+      //   type: "success",
+      //   text: "Hotel room has been booked successfully!",
+      // });
+      // delete user["password"];
+      // user["token"] = response.data.token;
+      // context.commit('signUserSuccess');
+      // } catch (e) {
+      //   this.loading = false;
+      //   Vue.notify({
+      //     group: "loggedIn",
+      //     type: "error",
+      //     text: "Unable to update image, please try again!",
+      //   });
+      //   console.log(e.response);
+      // }
+    },
+    openPopupModal(amount) {
+      this.popupDialog = true;
+      console.log(amount);
+      // this.roomAMount = Number(amount || 100) * 100;
+    },
     formatDate(date) {
       var today = new Date(date);
       var dd = today.getDate();
@@ -530,5 +712,12 @@ export default {
 .danger-text {
   color: red;
   font-size: 12px;
+}
+#pay-button {
+  background-color: green !important;
+  display: block;
+  border-radius: 16;
+  padding: 12px 16px;
+  width: 100%;
 }
 </style>
